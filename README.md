@@ -96,3 +96,28 @@ The contact form submits to `/api/contact`; it requires email-provider
 configuration to send messages. This is the site's only API integration.
 
 Deploy as a standard Next.js application. Netlify configuration is included.
+
+## GoDaddy Node.js deployment
+
+Deploy both `package.json` and `package-lock.json` from the same revision.
+Use `npm ci` to install dependencies, `npm run build` to build, and `npm start`
+to run the application. Include development dependencies during installation
+because the build uses TypeScript, Tailwind CSS, and PostCSS.
+
+If deployment reports `Missing: picomatch@4.0.7 from lock file`, the deployed
+lockfile is missing a transitive optional peer dependency used by Netlify's
+build tooling. The corrected lockfile includes it; redeploy the updated
+lockfile rather than adding `picomatch` as an application dependency or
+deleting the lockfile.
+
+To repair and validate this lockfile with npm 10 (the npm major that reproduced
+the error on the Node.js 22 hosting setup):
+
+```bash
+npx --yes npm@10 install --package-lock-only --ignore-scripts --no-audit --no-fund
+npx --yes npm@10 ci
+npm run build
+```
+
+Commit the updated lockfile before redeploying. Configure the contact email
+environment variables listed above in GoDaddy as well.
